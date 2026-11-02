@@ -15,7 +15,7 @@ VECTOR_SIZE = 768
 def open_vector_store(*, initialize=False):
     load_dotenv()
     connection_string = os.environ["DATABASE_URL"].replace(
-        "postgresql://", "postgresql+psycopg://", 1
+        "postgresql://", "postgresql+asyncpg://", 1
     )
     engine = PGEngine.from_connection_string(url=connection_string)
     embeddings = None

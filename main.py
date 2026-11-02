@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 import psycopg
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from psycopg.rows import dict_row
 from pydantic import BaseModel, Field
 
@@ -32,6 +33,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Docker Practice", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        origin.strip()
+        for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+        if origin.strip()
+    ],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
 
 
 class NoteInput(BaseModel):
@@ -73,8 +84,6 @@ def list_notes():
 
 @app.post("/search")
 def search_documents(body: SearchInput):
-    if not os.getenv("GEMINI_API_KEY", "").strip():
-        raise HTTPException(503, "백엔드의 GEMINI_API_KEY를 설정해 주세요.")
     try:
         documents = search(body.query)
     except LookupError:
